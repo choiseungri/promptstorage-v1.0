@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Storage 설정</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Prompt Storage 설정</h1>
+            <p>키워드와 문구를 등록하여 빠른 입력을 활용하세요</p>
+        </header>
+
+        <main>
+            <section class="add-section">
+                <h2>새 단축키 추가</h2>
+                <form id="addForm">
+                    <div class="form-group">
+                        <label for="keywordInput">키워드:</label>
+                        <input type="text" id="keywordInput" placeholder="예: greeting" required>
+                        <small>/ 없이 입력하세요</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="phraseInput">문구:</label>
+                        <textarea id="phraseInput" rows="4" placeholder="안녕하세요! 좋은 하루 되세요." required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" id="addButton" class="btn btn-primary">추가</button>
+                        <button type="button" id="cancelButton" class="btn btn-secondary" style="display: none;">취소</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="list-section">
+                <div class="section-header">
+                    <h2>등록된 단축키 목록</h2>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="키워드 검색...">
+                    </div>
+                </div>
+                <div id="mappingsList" class="mappings-list">
+                    <!-- 동적으로 생성됨 -->
+                </div>
+            </section>
+        </main>
+
+        <div id="notification" class="notification hidden"></div>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+</html>

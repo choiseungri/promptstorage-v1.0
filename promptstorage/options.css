@@ -1,0 +1,368 @@
+/* options.css */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    min-height: 100vh;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+header h1 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+header p {
+    color: #666;
+    font-size: 16px;
+}
+
+.add-section {
+    background-color: #f8f9fa;
+    padding: 30px;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 40px;
+}
+
+h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+small {
+    color: #666;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #4285f4;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #3367d6;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.btn-edit {
+    background-color: #28a745;
+    color: white;
+    padding: 6px 12px;
+    font-size: 12px;
+    margin-right: 8px;
+}
+
+.btn-edit:hover {
+    background-color: #218838;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    max-width: 300px;
+    margin: 0;
+}
+
+.mappings-list {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    min-height: 100px;
+}
+
+.mapping-item {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    background-color: white;
+    transition: background-color 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.mapping-item:hover {
+    background-color: #f8f9fa;
+}
+
+.mapping-item:last-child {
+    border-bottom: none;
+}
+
+.text-content {
+    flex: 1;
+    margin-right: 15px;
+}
+
+/* 키워드 헤더 영역 (키워드 + 토글 버튼) */
+.keyword-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.keyword {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 16px;
+    font-family: 'Courier New', monospace;
+    background-color: #e9ecef;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* 토글 버튼 스타일 */
+.toggle-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #666;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+}
+
+.toggle-btn:hover {
+    background-color: #e9ecef;
+    color: #333;
+}
+
+.toggle-btn.collapsed {
+    transform: rotate(-90deg);
+}
+
+/* 문구 컨테이너 */
+.phrase-container {
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.phrase-container.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0;
+}
+
+.phrase-container.expanded {
+    max-height: 1000px;
+    opacity: 1;
+    margin-bottom: 0;
+}
+
+.phrase {
+    color: #555;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border-left: 3px solid #4285f4;
+    margin-top: 8px;
+}
+
+/* 미리보기 모드 */
+.phrase-preview {
+    color: #888;
+    font-size: 14px;
+    font-style: italic;
+    margin-top: 4px;
+    padding: 5px 8px;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+    border-left: 2px solid #ddd;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.notification.success {
+    background-color: #28a745;
+}
+
+.notification.error {
+    background-color: #dc3545;
+}
+
+.notification.hidden {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.empty-state h3 {
+    margin-bottom: 10px;
+    color: #999;
+}
+
+#status {
+    margin-top: 15px;
+    text-align: center;
+    font-weight: bold;
+    min-height: 1.2em;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .add-section {
+        padding: 20px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .search-box input {
+        max-width: 100%;
+    }
+    
+    .mapping-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .text-content {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    
+    .actions {
+        align-self: flex-end;
+    }
+    
+    .keyword-header {
+        flex-wrap: wrap;
+    }
+}
