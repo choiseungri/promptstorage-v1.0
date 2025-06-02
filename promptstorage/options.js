@@ -1,5 +1,29 @@
 // options.js
 
+// HTML 이스케이프 함수를 스크립트 상단으로 이동
+function escapeHtml(text) {
+    if (typeof text !== 'string') return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// 검색어 하이라이팅 함수
+function getHighlightedText(text, term) {
+    if (!term) return escapeHtml(text);
+    const escapedText = escapeHtml(text);
+    // Regex 특수 문자를 term에서 이스케이프
+    const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    try {
+        const regex = new RegExp(`(${escapedTerm})`, 'gi');
+        return escapedText.replace(regex, '<span class="highlight">$1</span>');
+    } catch (e) {
+        // 잘못된 정규식의 경우 원본 텍스트 반환
+        console.error("Highlighting regex error:", e);
+        return escapedText;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const keywordInput = document.getElementById('keywordInput');
     const phraseInput = document.getElementById('phraseInput');
@@ -12,24 +36,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let allMappings = {};
     let editingKeyword = null;
-    let expandedItems = new Set(); // 펼쳐진 항목들 추적
+    let expandedItems = new Set();
 
-    // 초기 로드
     loadMappings();
 
-    // 폼 제출 처리
     addForm.addEventListener('submit', function(e) {
         e.preventDefault();
         handleAddOrUpdate();
     });
 
-    // 취소 버튼
     cancelButton.addEventListener('click', clearForm);
-
-    // 검색 기능
     searchInput.addEventListener('input', handleSearch);
 
-    // 키보드 단축키
     keywordInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -44,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 매핑 데이터 로드
     async function loadMappings() {
         try {
             const data = await chrome.storage.local.get(null);
@@ -56,16 +73,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 문구 미리보기 생성 (첫 50자 + ...)
     function createPreview(text) {
-        if (text.length <= 50) return text;
-        return text.substring(0, 50) + '...';
+        const currentSearchTerm = searchInput.value.trim().toLowerCase();
+        let previewText = text;
+        if (text.length > 50) {
+            previewText = text.substring(0, 50) + '...';
+        }
+        // 검색어가 있으면 미리보기에도 하이라이팅 적용
+        return currentSearchTerm ? getHighlightedText(previewText, currentSearchTerm) : escapeHtml(previewText);
     }
 
-    // 매핑 목록 렌더링 (토글 기능 추가)
     function renderMappings(filteredMappings = null) {
         const mappingsToShow = filteredMappings || allMappings;
         const keys = Object.keys(mappingsToShow).filter(key => typeof mappingsToShow[key] === 'string');
+        const currentSearchTerm = searchInput.value.trim().toLowerCase();
 
         if (keys.length === 0) {
             mappingsListDiv.innerHTML = `
@@ -76,34 +97,42 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             return;
         }
+        
+        // Chevron SVG icon
+        const chevronSvg = `<svg class="chevron-icon" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"></path></svg>`;
 
         mappingsListDiv.innerHTML = keys.sort().map(keyword => {
             const phrase = mappingsToShow[keyword];
             const isExpanded = expandedItems.has(keyword);
-            const preview = createPreview(phrase);
+            
+            // 하이라이팅 적용
+            const displayKeyword = currentSearchTerm ? getHighlightedText(keyword, currentSearchTerm) : escapeHtml(keyword);
+            const displayPhrase = currentSearchTerm ? getHighlightedText(phrase, currentSearchTerm) : escapeHtml(phrase);
+            const displayPreview = createPreview(phrase); // createPreview 내부에서 하이라이팅 처리
+
             const needsToggle = phrase.length > 50;
 
             return `
                 <div class="mapping-item" data-keyword="${escapeHtml(keyword)}">
                     <div class="text-content">
                         <div class="keyword-header" ${needsToggle ? 'data-toggle="true"' : ''}>
-                            <div class="keyword">/${escapeHtml(keyword)}</div>
+                            <div class="keyword">/${displayKeyword}</div>
                             ${needsToggle ? `
                                 <button class="toggle-btn ${isExpanded ? '' : 'collapsed'}" 
                                         data-action="toggle" 
                                         data-keyword="${escapeHtml(keyword)}"
                                         title="${isExpanded ? '접기' : '펼치기'}">
-                                    ▼
+                                    ${chevronSvg}
                                 </button>
                             ` : ''}
                         </div>
                         
                         ${needsToggle && !isExpanded ? `
-                            <div class="phrase-preview">${escapeHtml(preview)}</div>
+                            <div class="phrase-preview">${displayPreview}</div>
                         ` : ''}
                         
                         <div class="phrase-container ${needsToggle ? (isExpanded ? 'expanded' : 'collapsed') : 'expanded'}">
-                            <div class="phrase">${escapeHtml(phrase)}</div>
+                            <div class="phrase">${displayPhrase}</div>
                         </div>
                     </div>
                     <div class="actions">
@@ -114,11 +143,9 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
         }).join('');
 
-        // 동적으로 생성된 버튼들에 이벤트 리스너 추가
         addActionEventListeners();
     }
 
-    // 동적 버튼들에 이벤트 리스너 추가 (토글 기능 포함)
     function addActionEventListeners() {
         const editButtons = mappingsListDiv.querySelectorAll('[data-action="edit"]');
         const deleteButtons = mappingsListDiv.querySelectorAll('[data-action="delete"]');
@@ -141,7 +168,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // 토글 버튼 클릭 이벤트
         toggleButtons.forEach(button => {
             button.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -150,112 +176,108 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // 키워드 헤더 클릭으로도 토글 가능
         toggleHeaders.forEach(header => {
             header.addEventListener('click', function(e) {
-                // 버튼 클릭은 제외
-                if (e.target.classList.contains('toggle-btn')) return;
-                
+                if (e.target.closest('.toggle-btn')) return; // Use closest to handle clicks on SVG
                 const keyword = this.querySelector('.toggle-btn').getAttribute('data-keyword');
                 togglePhrase(keyword);
             });
         });
     }
 
-    // 문구 토글 함수
     function togglePhrase(keyword) {
-        const isExpanded = expandedItems.has(keyword);
-        
-        if (isExpanded) {
+        if (expandedItems.has(keyword)) {
             expandedItems.delete(keyword);
         } else {
             expandedItems.add(keyword);
         }
-        
-        // 해당 항목만 업데이트
         updateSingleItem(keyword);
     }
 
-    // 단일 항목 업데이트 (성능 최적화)
     function updateSingleItem(keyword) {
-        const item = mappingsListDiv.querySelector(`[data-keyword="${keyword}"]`);
+        const item = mappingsListDiv.querySelector(`[data-keyword="${escapeHtml(keyword)}"]`);
         if (!item) return;
 
         const phrase = allMappings[keyword];
         const isExpanded = expandedItems.has(keyword);
-        const preview = createPreview(phrase);
+        // createPreview handles highlighting internally based on searchInput
+        const displayPreview = createPreview(phrase); 
         const needsToggle = phrase.length > 50;
 
         if (!needsToggle) return;
 
         const toggleBtn = item.querySelector('.toggle-btn');
         const phraseContainer = item.querySelector('.phrase-container');
-        const phrasePreview = item.querySelector('.phrase-preview');
+        let phrasePreview = item.querySelector('.phrase-preview'); // Use let as it might be created
 
-        // 토글 버튼 상태 업데이트
         if (toggleBtn) {
             toggleBtn.classList.toggle('collapsed', !isExpanded);
             toggleBtn.title = isExpanded ? '접기' : '펼치기';
         }
 
-        // 컨테이너 상태 업데이트
         if (phraseContainer) {
             phraseContainer.classList.toggle('expanded', isExpanded);
             phraseContainer.classList.toggle('collapsed', !isExpanded);
         }
-
-        // 미리보기 표시/숨김
-        if (phrasePreview) {
-            phrasePreview.style.display = isExpanded ? 'none' : 'block';
-        } else if (!isExpanded) {
-            // 미리보기가 없으면 생성
-            const previewElement = document.createElement('div');
-            previewElement.className = 'phrase-preview';
-            previewElement.textContent = preview;
-            item.querySelector('.keyword-header').after(previewElement);
+        
+        // 미리보기 표시/숨김 및 내용 업데이트
+        if (isExpanded) {
+            if (phrasePreview) {
+                phrasePreview.style.display = 'none';
+            }
+        } else { // 축소된 상태
+            if (phrasePreview) {
+                phrasePreview.innerHTML = displayPreview; // Update content with potential highlighting
+                phrasePreview.style.display = 'block';
+            } else {
+                // 미리보기가 없으면 생성
+                const previewElement = document.createElement('div');
+                previewElement.className = 'phrase-preview';
+                previewElement.innerHTML = displayPreview; // Use innerHTML due to potential highlighting
+                // Insert after keyword-header
+                const keywordHeader = item.querySelector('.keyword-header');
+                if (keywordHeader && keywordHeader.parentNode) {
+                     keywordHeader.parentNode.insertBefore(previewElement, keywordHeader.nextSibling);
+                }
+            }
         }
     }
 
-    // 검색 처리
     function handleSearch() {
         const searchTerm = searchInput.value.toLowerCase().trim();
         
         if (!searchTerm) {
-            renderMappings();
+            renderMappings(); // Re-render without filter, highlighting will be handled by renderMappings
             return;
         }
 
         const filteredMappings = {};
-        Object.keys(allMappings).forEach(keyword => {
-            if (typeof allMappings[keyword] === 'string' && (
-                keyword.toLowerCase().includes(searchTerm) || 
-                allMappings[keyword].toLowerCase().includes(searchTerm)
+        Object.keys(allMappings).forEach(key => {
+            if (typeof allMappings[key] === 'string' && (
+                key.toLowerCase().includes(searchTerm) || 
+                allMappings[key].toLowerCase().includes(searchTerm)
             )) {
-                filteredMappings[keyword] = allMappings[keyword];
+                filteredMappings[key] = allMappings[key];
             }
         });
-
+        // renderMappings will apply highlighting based on currentSearchTerm
         renderMappings(filteredMappings);
     }
 
-    // 추가 또는 업데이트 처리
     async function handleAddOrUpdate() {
         const keyword = keywordInput.value.trim();
         const phrase = phraseInput.value.trim();
 
-        // 유효성 검사
         if (!keyword) {
             showNotification('키워드를 입력해주세요.', 'error');
             keywordInput.focus();
             return;
         }
-
         if (!phrase) {
             showNotification('문구를 입력해주세요.', 'error');
             phraseInput.focus();
             return;
         }
-
         if (keyword.includes('/') || keyword.includes(' ')) {
             showNotification('키워드에는 슬래시(/)나 공백을 사용할 수 없습니다.', 'error');
             keywordInput.focus();
@@ -263,34 +285,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (!editingKeyword && allMappings[keyword]) {
-            if (!confirm(`'${keyword}' 키워드가 이미 존재합니다. 덮어쓰시겠습니까?`)) {
+            if (!confirm(`'${escapeHtml(keyword)}' 키워드가 이미 존재합니다. 덮어쓰시겠습니까?`)) {
                 return;
             }
         }
 
         try {
-            // 기존 키워드를 수정하는 경우 기존 키워드 삭제
             if (editingKeyword && editingKeyword !== keyword) {
                 await chrome.storage.local.remove(editingKeyword);
                 delete allMappings[editingKeyword];
-                expandedItems.delete(editingKeyword); // 확장 상태도 제거
+                expandedItems.delete(editingKeyword);
             }
 
-            // 새 데이터 저장
             await chrome.storage.local.set({ [keyword]: phrase });
             allMappings[keyword] = phrase;
 
-            // 긴 문구인 경우 자동으로 펼쳐서 보여주기
-            if (phrase.length > 50) {
+            if (phrase.length > 50 && !editingKeyword) { // Only auto-expand for new long phrases
                 expandedItems.add(keyword);
+            } else if (editingKeyword && phrase.length <= 50) { // Collapse if edited to be short
+                expandedItems.delete(keyword);
             }
 
-            // UI 업데이트
-            renderMappings();
+            renderMappings(); // Re-render to reflect changes and potential highlighting
             clearForm();
             
             const action = editingKeyword ? '수정' : '추가';
-            showNotification(`키워드 '${keyword}'가 성공적으로 ${action}되었습니다.`, 'success');
+            showNotification(`키워드 '${escapeHtml(keyword)}'가 성공적으로 ${action}되었습니다.`, 'success');
             
         } catch (error) {
             showNotification('저장 중 오류가 발생했습니다.', 'error');
@@ -298,46 +318,41 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 수정 모드로 전환
-    function editMapping(keyword) {
-        editingKeyword = keyword;
-        keywordInput.value = keyword;
-        phraseInput.value = allMappings[keyword] || '';
+    function editMapping(keywordToEdit) {
+        editingKeyword = keywordToEdit; // Use a different variable name to avoid confusion
+        keywordInput.value = keywordToEdit;
+        phraseInput.value = allMappings[keywordToEdit] || '';
         addButton.textContent = '수정';
         cancelButton.style.display = 'inline-block';
         keywordInput.focus();
         
-        // 해당 항목으로 스크롤
-        const item = document.querySelector(`[data-keyword="${keyword}"]`);
+        const item = document.querySelector(`[data-keyword="${escapeHtml(keywordToEdit)}"]`);
         if (item) {
             item.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
 
-    // 삭제 처리
-    async function deleteMapping(keyword) {
-        if (!confirm(`'${keyword}' 키워드를 정말 삭제하시겠습니까?`)) {
+    async function deleteMapping(keywordToDelete) {
+        if (!confirm(`'${escapeHtml(keywordToDelete)}' 키워드를 정말 삭제하시겠습니까?`)) {
             return;
         }
 
         try {
-            await chrome.storage.local.remove(keyword);
-            delete allMappings[keyword];
-            expandedItems.delete(keyword); // 확장 상태도 제거
-            renderMappings();
-            showNotification(`키워드 '${keyword}'가 삭제되었습니다.`, 'success');
+            await chrome.storage.local.remove(keywordToDelete);
+            delete allMappings[keywordToDelete];
+            expandedItems.delete(keywordToDelete);
             
-            // 수정 중이던 항목이 삭제된 경우 폼 초기화
-            if (editingKeyword === keyword) {
-                clearForm();
+            if (editingKeyword === keywordToDelete) {
+                clearForm(); // Clear form if the item being edited is deleted
             }
+            renderMappings(); // Re-render
+            showNotification(`키워드 '${escapeHtml(keywordToDelete)}'가 삭제되었습니다.`, 'success');
         } catch (error) {
             showNotification('삭제 중 오류가 발생했습니다.', 'error');
             console.error('삭제 오류:', error);
         }
     }
 
-    // 폼 초기화
     function clearForm() {
         keywordInput.value = '';
         phraseInput.value = '';
@@ -347,21 +362,12 @@ document.addEventListener('DOMContentLoaded', function() {
         keywordInput.focus();
     }
 
-    // 알림 표시
     function showNotification(message, type = 'success') {
-        notification.textContent = message;
+        notification.innerHTML = message; // Use innerHTML if message might contain escaped HTML (e.g. from keyword)
         notification.className = `notification ${type}`;
         
         setTimeout(() => {
             notification.classList.add('hidden');
         }, 3000);
-    }
-
-    // HTML 이스케이프
-    function escapeHtml(text) {
-        if (typeof text !== 'string') return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 });
