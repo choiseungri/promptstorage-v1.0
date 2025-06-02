@@ -70,7 +70,7 @@ input[type="text"], textarea {
     border: 2px solid #ddd;
     border-radius: 6px;
     font-size: 14px;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Added box-shadow transition */
 }
 
 input[type="text"]:focus, textarea:focus {
@@ -107,6 +107,11 @@ small {
     transition: all 0.3s ease;
 }
 
+.btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
+}
+
 .btn-primary {
     background-color: #4285f4;
     color: white;
@@ -117,6 +122,11 @@ small {
     transform: translateY(-1px);
 }
 
+.btn-primary:focus {
+    background-color: #3367d6; /* Keep hover style on focus */
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.3);
+}
+
 .btn-secondary {
     background-color: #6c757d;
     color: white;
@@ -124,6 +134,11 @@ small {
 
 .btn-secondary:hover {
     background-color: #5a6268;
+}
+
+.btn-secondary:focus {
+    background-color: #5a6268;
+    box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.3);
 }
 
 .btn-danger {
@@ -137,6 +152,11 @@ small {
     background-color: #c82333;
 }
 
+.btn-danger:focus {
+    background-color: #c82333;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+}
+
 .btn-edit {
     background-color: #28a745;
     color: white;
@@ -147,6 +167,11 @@ small {
 
 .btn-edit:hover {
     background-color: #218838;
+}
+
+.btn-edit:focus {
+    background-color: #218838;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
 }
 
 .section-header {
@@ -169,10 +194,10 @@ small {
 }
 
 .mapping-item {
-    padding: 20px;
+    padding: 15px; /* Adjusted padding */
     border-bottom: 1px solid #e0e0e0;
     background-color: white;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease; /* Added transition */
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -191,12 +216,11 @@ small {
     margin-right: 15px;
 }
 
-/* 키워드 헤더 영역 (키워드 + 토글 버튼) */
 .keyword-header {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 10px; /* Adjusted margin */
     cursor: pointer;
     user-select: none;
 }
@@ -212,11 +236,10 @@ small {
     display: inline-block;
 }
 
-/* 토글 버튼 스타일 */
 .toggle-btn {
     background: none;
     border: none;
-    font-size: 16px;
+    font-size: 16px; /* Will be overridden by SVG size if SVG is used */
     color: #666;
     cursor: pointer;
     padding: 2px 6px;
@@ -234,11 +257,24 @@ small {
     color: #333;
 }
 
-.toggle-btn.collapsed {
+.toggle-btn:focus {
+    outline: none;
+    background-color: #e0e0e0;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles for SVG chevron */
+.toggle-btn svg.chevron-icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+    fill: currentColor;
+}
+
+.toggle-btn.collapsed svg.chevron-icon {
     transform: rotate(-90deg);
 }
 
-/* 문구 컨테이너 */
 .phrase-container {
     overflow: hidden;
     transition: all 0.3s ease;
@@ -267,7 +303,6 @@ small {
     margin-top: 8px;
 }
 
-/* 미리보기 모드 */
 .phrase-preview {
     color: #888;
     font-size: 14px;
@@ -294,7 +329,7 @@ small {
     color: white;
     font-weight: 600;
     z-index: 1000;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Updated transition */
 }
 
 .notification.success {
@@ -307,7 +342,7 @@ small {
 
 .notification.hidden {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-20px) translateX(20px); /* Updated transform for diagonal movement */
     pointer-events: none;
 }
 
@@ -329,39 +364,49 @@ small {
     min-height: 1.2em;
 }
 
+/* Search highlighting class */
+.highlight {
+    background-color: #fff352; /* Yellow highlight */
+    color: #333; /* Ensure text is readable */
+    font-weight: bold;
+    padding: 0.1em 0;
+    border-radius: 3px;
+}
+
+
 @media (max-width: 600px) {
     .container {
         padding: 15px;
     }
-    
+
     .add-section {
         padding: 20px;
     }
-    
+
     .section-header {
         flex-direction: column;
         align-items: stretch;
         gap: 15px;
     }
-    
+
     .search-box input {
         max-width: 100%;
     }
-    
+
     .mapping-item {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .text-content {
         margin-right: 0;
         margin-bottom: 15px;
     }
-    
+
     .actions {
         align-self: flex-end;
     }
-    
+
     .keyword-header {
         flex-wrap: wrap;
     }
