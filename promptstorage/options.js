@@ -195,7 +195,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateSingleItem(keyword) {
-        const item = mappingsListDiv.querySelector(`[data-keyword="${escapeHtml(keyword)}"]`);
+        const escapedKeyword = CSS.escape(keyword);
+        const item = mappingsListDiv.querySelector(`[data-keyword="${escapedKeyword}"]`);
         if (!item) return;
 
         const phrase = allMappings[keyword];
@@ -326,7 +327,8 @@ document.addEventListener('DOMContentLoaded', function() {
         cancelButton.style.display = 'inline-block';
         keywordInput.focus();
         
-        const item = document.querySelector(`[data-keyword="${escapeHtml(keywordToEdit)}"]`);
+        const escapedKeyword = CSS.escape(keywordToEdit);
+        const item = document.querySelector(`[data-keyword="${escapedKeyword}"]`);
         if (item) {
             item.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
